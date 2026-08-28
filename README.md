@@ -9,9 +9,11 @@ script.js     countdown, campi invitati, invio del modulo
 img/          le vostre foto (foto-1.jpeg, foto-2.jpeg, foto-3.jpeg)
 ```
 
-Più due file che il sito non usa: `strumenti-motivi.py` rigenera i motivi
-decorativi sparsi e `strumenti-cornice.py` la cornice dell'apertura. Servono
-solo se vuoi cambiarne densità o disposizione, e si possono cancellare.
+Più tre file che il sito non carica mai: `foglio-google.gs` è il codice da
+incollare in Apps Script per raccogliere le conferme in un foglio (sezione 2);
+`strumenti-motivi.py` rigenera i motivi decorativi sparsi e
+`strumenti-cornice.py` la cornice dell'apertura — questi due servono solo se
+vuoi cambiarne densità o disposizione, e si possono cancellare.
 
 ---
 
@@ -41,12 +43,75 @@ git push -u origin main
 
 ## 2. Modulo di conferma
 
-GitHub Pages serve solo file statici: non può ricevere dati da sé. Il modulo funziona già, gli serve solo un indirizzo a cui consegnare le risposte. Scegli una delle due strade e incollala in `script.js`, alla voce `endpointModulo`.
+GitHub Pages serve solo file statici: non può ricevere dati da sé. Il modulo funziona già, gli serve solo un indirizzo a cui consegnare le risposte.
 
-### Formspree — la via rapida (10 minuti)
+Le strade sono due e **non fanno la stessa cosa**:
 
-1. Registrati su [formspree.io](https://formspree.io) (il piano gratuito copre 50 invii al mese).
-2. Crea un nuovo form e copia l'indirizzo che ti viene mostrato, del tipo `https://formspree.io/f/abcdwxyz`.
+| | Google Sheets | Formspree |
+|---|---|---|
+| Cosa ottieni | **un foglio solo, una riga per invitato** | una email per ogni invio |
+| Se qualcuno si corregge | la sua riga viene aggiornata | arriva una seconda email, e le confronti a mano |
+| Da attivare | ~15 minuti | ~10 minuti |
+| Voce `tipoEndpoint` | `"apps-script"` | `"formspree"` |
+
+Se volete il riepilogo unico — presenze, allergie, email, tutto in un posto — la strada è **Google Sheets**. Formspree resta come ripiego.
+
+### Google Sheets — il riepilogo unico (consigliata)
+
+Alla fine avrete un foglio così, **una riga per persona**, non per gruppo:
+
+| Nome e cognome | Partecipa | Allergie | Email di contatto | Telefono | Referente del gruppo | Messaggio | Prima risposta | Ultimo aggiornamento | N. modifiche | Chiave |
+|---|---|---|---|---|---|---|---|---|---|---|
+| Ivan Cucchi | Sì | nessuna | ivan@… | 333… | Ivan Cucchi | arriviamo in treno | 12/03 10:04 | 28/04 21:11 | 2 | cucchi ivan |
+| Greta Zucchi | Sì | lattosio | ivan@… | 333… | Ivan Cucchi | | 12/03 10:04 | 28/04 21:11 | 2 | greta zucchi |
+
+Filtrate la colonna *Allergie* e avete la lista per il catering; filtrate *Partecipa* e avete il numero dei coperti.
+
+**Come attivarlo:**
+
+1. Create un foglio Google nuovo e apritelo.
+2. **Estensioni → Apps Script**. Si apre un editor con dentro `function myFunction() {}`: cancellate tutto.
+3. Aprite il file **`foglio-google.gs`** di questo repository, copiatelo per intero e incollatelo lì. Salvate (icona del dischetto).
+4. **Deploy → Nuovo deployment → ⚙︎ → App web**. *Esegui come* «Io», *Chi ha accesso* «Chiunque». Autorizzate quando ve lo chiede: Google mostra una schermata di avviso perché il codice non è verificato — è il vostro, proseguite da *Avanzate → Vai a (nome progetto)*.
+5. Copiate l'URL che finisce per `/exec` e incollatelo in `script.js`:
+
+```js
+endpointModulo: "https://script.google.com/macros/s/IL_TUO_ID/exec",
+tipoEndpoint: "apps-script",
+```
+
+6. **Provate voi per primi**, prima di mandare il link a chiunque: compilate una conferma finta, controllate che compaia la riga, rimandate lo stesso nome con un'allergia diversa e controllate che la riga si aggiorni invece di sdoppiarsi. Poi cancellate le righe di prova.
+
+Per averlo in Excel: **File → Scarica → Microsoft Excel (.xlsx)**. Il foglio resta la copia viva, lo `.xlsx` è la fotografia del momento.
+
+> **Se modificate `foglio-google.gs` dopo il primo deploy**, salvare non basta: il sito continua a parlare con la versione vecchia. Bisogna fare **Deploy → Gestisci deployment → ✎ → Versione: Nuova versione → Distribuisci**, tenendo lo stesso URL.
+
+### Come funziona l'aggiornamento di una risposta
+
+Chi cambia idea non deve scrivere a nessuno: torna sulla pagina, ricompila e reinvia. Il foglio non aggiunge una riga nuova — **cerca ogni persona per nome e cognome e aggiorna la sua**. Vale per tutto il gruppo, non solo per chi compila: se il referente correggeva l'allergia della figlia, è la riga della figlia a cambiare.
+
+Il confronto fra i nomi non è letterale, altrimenti non funzionerebbe mai. Prima di confrontarli il codice toglie accenti, maiuscole, doppi spazi e apostrofi, e **ignora l'ordine**: `Cucchi Ivan`, `ivan cucchi` e `Ivan Cucchì` sono la stessa persona. Il risultato finisce nella colonna *Chiave*: se due righe vi sembrano la stessa persona non fusa, guardate lì e capite subito perché.
+
+Ignorare l'ordine ha un rovescio: due invitati che si chiamano `Anna Maria Rossi` e `Maria Anna Rossi` verrebbero fusi in una riga sola. Se fra i vostri invitati esiste un caso del genere, in cima a `foglio-google.gs` mettete `IGNORA_ORDINE_DEL_NOME = false` (e ricordatevi del riquadro qui sopra sul nuovo deployment).
+
+Altri due comportamenti che vale la pena conoscere:
+
+- **Chi sparisce da un gruppo non viene cancellato.** Se il referente prima annunciava tre persone e poi ne annuncia due, la terza riga resta, marcata `Non più in elenco`. Una riga cancellata sparirebbe senza lasciare traccia e non sapreste più che quella persona era stata annunciata. Filtratele via quando contate i coperti.
+- **Chi risponde «no» porta con sé il suo gruppo.** Le righe di tutti passano a `No`, ma le allergie già scritte restano: se cambiano idea sono già lì.
+- **L'ultimo che parla ha ragione.** Se una persona compare in due gruppi diversi, la sua riga porta il nome del referente che ha inviato per ultimo, e il vecchio referente non può più modificarla.
+
+### Il foglio «Registro»
+
+Nello stesso documento compare un secondo foglio, `Registro`, che **non viene mai riscritto**: una riga per ogni invio, con dentro il testo completo di quello che è arrivato. Serve quando il foglio `Invitati` non torna — «ma prima cosa aveva scritto?» — e la risposta buona è stata sovrascritta. Non serve guardarlo mai, serve che esista.
+
+### Una nota sull'indirizzo
+
+L'URL `/exec` sta dentro `script.js`, che è pubblico: chiunque apra il codice della pagina lo vede, e chiunque lo veda può mandare dati al foglio. Per una lista di nozze è un rischio accettabile — al massimo qualcuno vi scrive righe finte, che riconoscete e cancellate — ma vale la pena saperlo. Il codice si difende sul minimo indispensabile: taglia i testi troppo lunghi, ferma i gruppi oltre le 20 persone e rifiuta gli invii senza referente, così nessuno può gonfiare il foglio con un invio solo. Se preferite non correre nemmeno questo rischio, l'alternativa è Formspree, dove l'indirizzo pubblico è protetto dal loro sistema antiabuso.
+
+### Formspree — la via rapida
+
+1. Registratevi su [formspree.io](https://formspree.io) (il piano gratuito copre 50 invii al mese).
+2. Create un nuovo form e copiate l'indirizzo che vi viene mostrato, del tipo `https://formspree.io/f/abcdwxyz`.
 3. In `script.js`:
 
 ```js
@@ -54,36 +119,7 @@ endpointModulo: "https://formspree.io/f/abcdwxyz",
 tipoEndpoint: "formspree",
 ```
 
-Ogni conferma arriva per email con tutti i campi, invitato per invitato.
-
-### Google Sheets — le risposte in tabella
-
-Visto che lavori già con Sheets, questa è probabilmente la strada che preferisci: le conferme finiscono in un foglio pronto da filtrare per allergie.
-
-1. Crea un foglio Google e apri **Estensioni → Apps Script**.
-2. Incolla:
-
-```js
-function doPost(e) {
-  const foglio = SpreadsheetApp.getActiveSpreadsheet().getSheets()[0];
-  const dati = e.parameter;
-  if (foglio.getLastRow() === 0) {
-    foglio.appendRow(["Ricevuto il", ...Object.keys(dati)]);
-  }
-  foglio.appendRow([new Date(), ...Object.values(dati)]);
-  return ContentService.createTextOutput("ok");
-}
-```
-
-3. **Deploy → New deployment → Web app**, *Execute as* «Me», *Who has access* «Anyone», e copia l'URL `https://script.google.com/macros/s/…/exec`.
-4. In `script.js`:
-
-```js
-endpointModulo: "https://script.google.com/macros/s/IL_TUO_ID/exec",
-tipoEndpoint: "apps-script",
-```
-
-Le colonne cambiano a seconda di quanti invitati indica ogni gruppo: normale, il foglio si allarga da solo.
+Ogni conferma arriva per email con tutti i campi, invitato per invitato. Nessun riepilogo e nessun aggiornamento: se qualcuno si corregge ricevete una seconda email e siete voi a dover capire quale delle due vale.
 
 ### Come è resa obbligatoria l'allergia
 
@@ -99,7 +135,7 @@ Per ogni invitato indicato nel menu «Quante persone» compare una scheda con no
 |---|---|
 | `dataMatrimonio` | Data e ora della cerimonia. **I mesi partono da 0**: luglio è `6`, settembre è `8`. |
 | `endpointModulo` | L'indirizzo del punto 2. |
-| `tipoEndpoint` | `"formspree"` oppure `"apps-script"`. |
+| `tipoEndpoint` | `"apps-script"` per il foglio Google, `"formspree"` per le email. Cambia la forma di quello che viene spedito, non solo la destinazione: non basta cambiare l'indirizzo. |
 | `maxInvitati` | Massimo di persone per gruppo. Se lo cambi, aggiorna anche le opzioni del menu in `index.html`. |
 
 ### `index.html`
@@ -113,7 +149,7 @@ Da sostituire, in ordine di comparsa:
 - i tre riquadri della sezione «Dove parcheggiare». Questi funzionano **per coordinate**, non per indirizzo, perché un piazzale di montagna spesso non ha un civico: su Google Maps da computer fai click destro sul punto esatto, la prima voce del menu sono le coordinate, e le incolli dopo `destination=`. Per aggiungere o togliere un parcheggio, duplica o cancella un intero blocco `<article class="parcheggio">`: la griglia si riadatta da sola;
 - i cinque riquadri «In auto / In treno / Fra i due luoghi / Dove dormire / Cosa portare»;
 - gli orari del programma, che vanno tenuti d'accordo con `dataMatrimonio` in `script.js`: il countdown punta all'ora della cerimonia;
-- nella sezione regali: intestatari, IBAN (in **due posti**: il testo e l'attributo `data-iban` del pulsante) e causale;
+- nella sezione regali: le **due schede** `.iban`, una per intestatario. In ciascuna vanno l'intestatario e l'IBAN, e l'IBAN va scritto in **due posti che devono coincidere**: il testo dentro `<p class="iban__valore--codice">` (quello che si legge) e l'attributo `data-iban` del pulsante (quello che finisce negli appunti). La causale è una sola, sotto le schede. Per aggiungere o togliere un intestatario basta duplicare o cancellare un blocco `<div class="iban">`: la griglia si riadatta e il pulsante funziona da solo, perché `script.js` cerca tutti gli elementi con `data-iban` invece di un id fisso;
 - email e telefono nel fondo pagina, e l'indirizzo email che compare nel messaggio d'errore in `script.js`.
 
 ### `style.css` — tema e motivo decorativo
@@ -389,11 +425,13 @@ lasciato pulito. Se preferisci la vecchia texture di sfondo, aggiungi la parola
 
 - Aprilo sul telefono: la maggior parte degli invitati lo vedrà da WhatsApp.
 - Prova una conferma vera, con due o tre persone, e controlla che arrivi tutto.
+- Poi **rimanda la stessa conferma** cambiando un'allergia: nel foglio la riga deve aggiornarsi, non sdoppiarsi. È la prova che conta di più, ed è quella che si dimentica.
 - Prova a inviare lasciando vuote le allergie: deve bloccarti.
+- Cancella le righe di prova prima di mandare il link in giro.
 - Verifica che i link della mappa aprano il posto giusto.
-- Controlla l'IBAN carattere per carattere, e poi fallo ricontrollare da qualcun altro.
+- Controlla **entrambi gli IBAN** carattere per carattere, e poi falli ricontrollare da qualcun altro. Controlla anche che il pulsante copi lo stesso codice che si legge sopra: sono due punti distinti del file e possono divergere.
 
-Una nota sull'IBAN: pubblicandolo su una pagina aperta lo rendi visibile a chiunque. Non è un rischio per il conto — con l'IBAN si può solo ricevere, non prelevare — ma è un dato che finisce nei motori di ricerca. Se preferisci tenerlo riservato, un'alternativa è togliere il codice dalla pagina e lasciare una riga tipo «scriveteci e ve lo mandiamo».
+Una nota sugli IBAN: pubblicandoli su una pagina aperta lo rendi visibile a chiunque. Non è un rischio per il conto — con l'IBAN si può solo ricevere, non prelevare — ma è un dato che finisce nei motori di ricerca. Se preferisci tenerlo riservato, un'alternativa è togliere il codice dalla pagina e lasciare una riga tipo «scriveteci e ve lo mandiamo».
 
 ---
 

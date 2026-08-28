@@ -11,10 +11,14 @@ const CONFIG = {
 
   // Indirizzo dove ricevere le conferme.
   // Come ottenerlo è spiegato nel README, sezione "Modulo di conferma".
-  endpointModulo: "https://formspree.io/f/INSERISCI_IL_TUO_CODICE",
+  endpointModulo: "https://script.google.com/macros/s/AKfycbynAN7HUaAKyVa2s4OTvY4hxu5afL8XEZCyhVQwnsMY-x-tp7PP20VUZBYNFaG_KEmSjw/exec",
 
-  // "formspree" oppure "apps-script" (Google Sheets)
-  tipoEndpoint: "formspree",
+  // "apps-script" → una riga per invitato in un foglio Google, e le
+  //                 risposte già date vengono aggiornate al posto loro.
+  // "formspree"   → ogni conferma arriva come una email a sé. Più veloce
+  //                 da attivare, ma nessun riepilogo: gli aggiornamenti
+  //                 restano email separate da confrontare a mano.
+  tipoEndpoint: "apps-script",
 
   // Numero massimo di invitati per gruppo (deve combaciare con le
   // opzioni del menu "Quante persone" in index.html)
@@ -247,19 +251,31 @@ if (pista) {
 
 /* ---------- 5. Copia dell'IBAN ---------- */
 
-const bottoneIban = document.getElementById("copiaIban");
-const messaggioIban = document.getElementById("ibanCopiato");
+/* Gli intestatari sono due, quindi i bottoni sono due. Invece di cercarli per
+   id li prendiamo tutti insieme: chiunque aggiunga una scheda nell'HTML ottiene
+   il bottone funzionante senza toccare questo file. Ogni bottone scrive nel
+   "Copiato" della PROPRIA scheda (lo cerca dentro il .iban che lo contiene),
+   altrimenti copiando il secondo IBAN si accenderebbe la conferma del primo. */
 
-bottoneIban.addEventListener("click", async () => {
-  const iban = bottoneIban.dataset.iban.replace(/\s/g, "");
-  try {
-    await navigator.clipboard.writeText(iban);
-    messaggioIban.textContent = "Copiato";
-  } catch {
-    messaggioIban.textContent = "Selezionalo e copialo a mano";
-  }
-  messaggioIban.hidden = false;
-  setTimeout(() => { messaggioIban.hidden = true; }, 3000);
+document.querySelectorAll("[data-iban]").forEach((bottone) => {
+  const messaggio = bottone.closest(".iban").querySelector(".iban__copiato");
+  let attesa = null;
+
+  bottone.addEventListener("click", async () => {
+    const iban = bottone.dataset.iban.replace(/\s/g, "");
+    try {
+      await navigator.clipboard.writeText(iban);
+      messaggio.textContent = "Copiato";
+    } catch {
+      messaggio.textContent = "Selezionalo e copialo a mano";
+    }
+    messaggio.hidden = false;
+    // Il timer va azzerato a ogni clic: senza questo, due clic ravvicinati
+    // lasciano in piedi il primo timeout, che nasconde il messaggio del secondo
+    // dopo una frazione di secondo.
+    clearTimeout(attesa);
+    attesa = setTimeout(() => { messaggio.hidden = true; }, 3000);
+  });
 });
 
 
@@ -403,6 +419,49 @@ function mostraEsito(tipo, testo) {
 
 /* ---------- 8. Modulo: invio ---------- */
 
+/* Quello che raccogliamo non è una lista piatta di caselle ma un gruppo:
+   un referente e le persone di cui risponde. Lo mandiamo con questa forma,
+   perché il foglio deve poter trattare ogni invitato come una riga a sé e
+   ritrovarlo per nome quando la stessa persona rimanda il modulo. */
+
+function datiDelModulo() {
+  const valore = (id) => document.getElementById(id).value.trim();
+
+  const invitati = [...contenitoreInvitati.querySelectorAll(".invitato")].map((scheda) => ({
+    nome: scheda.querySelector('input[id^="nome-"]').value.trim(),
+    allergie: scheda.querySelector('input[id^="allergie-"]').value.trim(),
+  })).filter((p) => p.nome);
+
+  return {
+    referente: valore("referente"),
+    email: valore("email"),
+    telefono: valore("telefono"),
+    partecipazione: siPartecipo.checked ? "si" : "no",
+    messaggio: valore("messaggio"),
+    invitati: siPartecipo.checked ? invitati : [],
+  };
+}
+
+/* Formspree si aspetta dei campi, non un oggetto: qui il gruppo torna
+   piatto, una coppia di campi per invitato. Serve solo a chi sceglie
+   quella strada; con Apps Script parte il JSON qui sopra. */
+
+function appiattisci(dati) {
+  const campi = new FormData();
+  campi.append("Persona di riferimento", dati.referente);
+  campi.append("Email", dati.email);
+  campi.append("Telefono", dati.telefono);
+  campi.append("Partecipazione", dati.partecipazione === "si" ? "Sì, partecipo" : "No, non partecipo");
+  campi.append("Numero di persone", String(dati.invitati.length));
+  dati.invitati.forEach((p, i) => {
+    campi.append(`Invitato ${i + 1} — nome`, p.nome);
+    campi.append(`Invitato ${i + 1} — allergie`, p.allergie);
+  });
+  campi.append("Messaggio", dati.messaggio);
+  campi.append("_subject", "Conferma matrimonio — " + dati.referente);
+  return campi;
+}
+
 modulo.addEventListener("submit", async (e) => {
   e.preventDefault();
   esito.hidden = true;
@@ -414,26 +473,41 @@ modulo.addEventListener("submit", async (e) => {
     return;
   }
 
-  const dati = new FormData(modulo);
-  dati.append("_subject", "Conferma matrimonio — " + document.getElementById("referente").value);
+  const dati = datiDelModulo();
+  const versoFoglio = CONFIG.tipoEndpoint === "apps-script";
 
   const testoOriginale = bottoneInvia.textContent;
   bottoneInvia.disabled = true;
   bottoneInvia.textContent = "Invio in corso…";
 
   try {
+    /* Il corpo parte come stringa e SENZA impostare Content-Type: il
+       browser lo etichetta text/plain, che è fra i tipi "semplici". È
+       l'unico modo per non far scattare la richiesta OPTIONS di verifica,
+       a cui Apps Script non sa rispondere: la conferma verrebbe rifiutata
+       prima ancora di partire. Dall'altra parte il JSON si legge in
+       e.postData.contents. */
     const risposta = await fetch(CONFIG.endpointModulo, {
       method: "POST",
-      body: dati,
-      headers: CONFIG.tipoEndpoint === "formspree" ? { Accept: "application/json" } : {},
+      body: versoFoglio ? JSON.stringify(dati) : appiattisci(dati),
+      headers: versoFoglio ? {} : { Accept: "application/json" },
+      redirect: "follow",
     });
 
     if (!risposta.ok) throw new Error("HTTP " + risposta.status);
 
+    // Apps Script risponde 200 anche quando il codice dentro è andato in
+    // errore, quindi il vero esito è nel corpo. Se non è leggibile non ci
+    // inventiamo un fallimento: la riga potrebbe essere stata scritta.
+    if (versoFoglio) {
+      const detto = await risposta.json().catch(() => null);
+      if (detto && detto.ok === false) throw new Error(detto.errore || "rifiutato dal foglio");
+    }
+
     modulo.reset();
     contenitoreInvitati.innerHTML = "";
     bloccoPresenti.hidden = true;
-    mostraEsito("ok", "Conferma ricevuta, grazie. Vi arriva un riepilogo per email entro pochi minuti: se non lo vedete, controllate lo spam.");
+    mostraEsito("ok", "Conferma ricevuta, grazie. Se dovete cambiare qualcosa, tornate qui e rimandate il modulo con gli stessi nomi: sostituisce questa risposta.");
     esito.scrollIntoView({ block: "center", behavior: "smooth" });
   } catch (errore) {
     mostraEsito("ko", "La conferma non è partita. Riprova tra un minuto oppure scrivici a ivanesofia@example.com: registriamo tutto a mano.");

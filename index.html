@@ -454,14 +454,14 @@
     <div class="contenitore contenitore--stretto">
       <p class="sopratitolo sopratitolo--scuro">Conferma la presenza</p>
       <h2>Fatecelo sapere entro il 30 aprile 2027</h2>
-      <p class="introduzione">Un modulo per gruppo: chi compila è la persona di riferimento per tutti gli altri. Le allergie servono al catering, quindi sono obbligatorie per ogni invitato.</p>
+      <p class="introduzione">Un modulo per gruppo: chi compila è la persona di riferimento per tutti gli altri. Le allergie servono al catering, quindi sono obbligatorie per ogni invitato. Potete tornare qui e rimandare il modulo tutte le volte che volete: vale sempre l'ultima risposta.</p>
 
       <form class="modulo" id="modulo" novalidate>
 
         <div class="campo">
           <label for="referente">Nome e cognome della persona di riferimento</label>
           <input type="text" id="referente" name="Persona di riferimento" autocomplete="name" required>
-          <p class="campo__aiuto">È il nome con cui troviamo il vostro gruppo nella lista.</p>
+          <p class="campo__aiuto">È il nome con cui troviamo il vostro gruppo nella lista. Se state aggiornando una risposta già inviata, scrivetelo come la prima volta.</p>
         </div>
 
         <div class="campo-doppio">
@@ -506,24 +506,6 @@
           </div>
 
           <div class="invitati" id="invitati" aria-live="polite"></div>
-
-          <fieldset class="campo">
-            <legend>Navetta da Milano</legend>
-            <div class="scelte">
-              <label class="scelta">
-                <input type="radio" name="Navetta" value="Sì, per tutto il gruppo">
-                <span>Sì, per tutti</span>
-              </label>
-              <label class="scelta">
-                <input type="radio" name="Navetta" value="Solo andata">
-                <span>Solo andata</span>
-              </label>
-              <label class="scelta">
-                <input type="radio" name="Navetta" value="No, arriviamo con mezzi nostri" checked>
-                <span>No, veniamo da soli</span>
-              </label>
-            </div>
-          </fieldset>
         </div>
 
         <div class="campo">
@@ -534,31 +516,54 @@
         <p class="modulo__esito" id="esito" role="status" hidden></p>
 
         <button class="bottone bottone--pieno" type="submit" id="invia">Invia la conferma</button>
-        <p class="campo__aiuto">Riceverete un riepilogo per email. Se dovete cambiare qualcosa, ricompilate il modulo: vale l'ultima risposta.</p>
+        <p class="campo__aiuto">Se dovete cambiare qualcosa, ricompilate il modulo e reinviatelo: sostituisce la risposta precedente, la vecchia non resta in giro. Riconosciamo le persone <strong>dal nome e cognome</strong>, quindi riscriveteli come la prima volta.</p>
       </form>
     </div>
   </section>
 
   <!-- ============ REGALI ============ -->
+  <!-- DA COMPLETARE: i due IBAN qui sotto sono di esempio. Ognuno va scritto in
+       DUE posti che devono coincidere: il testo dentro <p class="iban__valore--codice">
+       (quello che si legge) e l'attributo data-iban del bottone (quello che
+       finisce negli appunti). Se ne aggiungete o togliete uno, non serve
+       toccare il JavaScript: si accorge da solo dei bottoni con data-iban, e la
+       griglia si riadatta al numero di schede. -->
   <section class="sezione sezione--scura" id="regali">
-    <div class="contenitore contenitore--stretto">
+    <div class="contenitore">
       <p class="sopratitolo">Regali</p>
       <h2>Se volete farci un pensiero</h2>
-      <p class="introduzione introduzione--chiara">La cosa che ci fa più piacere è avervi lì. Chi desidera contribuire può farlo con un bonifico: stiamo mettendo da parte per il viaggio di nozze in Giappone.</p>
+      <p class="introduzione introduzione--chiara">La cosa che ci fa più piacere è avervi lì. Chi desidera contribuire può farlo con un bonifico: stiamo mettendo da parte per il viaggio di nozze in Giappone. I conti sono due, intestati a ciascuno di noi: usate quello che preferite, per noi è lo stesso.</p>
 
-      <div class="iban">
-        <p class="iban__etichetta">Intestatari</p>
-        <p class="iban__valore">Ivan Cucchi e Greta Zucchi</p>
+      <div class="iban-coppia">
+        <div class="iban">
+          <p class="iban__etichetta">Intestatario</p>
+          <p class="iban__valore">Ivan Cucchi</p>
 
-        <p class="iban__etichetta">IBAN</p>
-        <p class="iban__valore iban__valore--codice" id="ibanValore">IT60X0542811101000000123456</p>
+          <p class="iban__etichetta">IBAN</p>
+          <p class="iban__valore iban__valore--codice">IT67G0306932550100000010935</p>
 
-        <p class="iban__etichetta">Causale</p>
-        <p class="iban__valore">Regalo di nozze — il vostro nome</p>
+          <div class="iban__azione">
+            <button class="bottone bottone--chiaro" type="button" data-iban="IT67G0306932550100000010935">Copia l'IBAN di Ivan</button>
+            <span class="iban__copiato" role="status" hidden>Copiato</span>
+          </div>
+        </div>
 
-        <button class="bottone bottone--chiaro" type="button" id="copiaIban" data-iban="IT60X0542811101000000123456">Copia l'IBAN</button>
-        <span class="iban__copiato" id="ibanCopiato" role="status" hidden>Copiato</span>
+        <div class="iban">
+          <p class="iban__etichetta">Intestataria</p>
+          <p class="iban__valore">Greta Zucchi</p>
+
+          <p class="iban__etichetta">IBAN</p>
+          <p class="iban__valore iban__valore--codice">IT10W0366901600684084520857
+</p>
+
+          <div class="iban__azione">
+            <button class="bottone bottone--chiaro" type="button" data-iban="IT10W0366901600684084520857">Copia l'IBAN di Greta</button>
+            <span class="iban__copiato" role="status" hidden>Copiato</span>
+          </div>
+        </div>
       </div>
+
+      <p class="iban__causale">Causale, per entrambi: <strong>Regalo di nozze — il vostro nome</strong></p>
     </div>
   </section>
 

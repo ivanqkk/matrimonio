@@ -189,7 +189,7 @@ a { color: var(--bosco); }
 .introduzione {
   font-size: 1.1rem;
   color: var(--testo-tenue);
-  max-width: 58ch;
+  max-width: none;
   margin: 0 0 2.5rem;
 }
 
@@ -1003,7 +1003,20 @@ a { color: var(--bosco); }
 
 /* ---------- regali ---------- */
 
+/* Le schede stanno affiancate finché ognuna ha almeno 300px: sotto quella
+   soglia auto-fit le impila da solo, senza bisogno di una media query. Restano
+   della stessa altezza (lo stretch di default della griglia) e sono flex in
+   colonna, così il bottone di ciascuna può essere spinto in fondo con
+   margin-top:auto e i due bottoni si allineano fra loro anche se un IBAN va a
+   capo e l'altro no. */
+.iban-coppia {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: clamp(1rem, 2.6vw, 1.6rem);
+}
 .iban {
+  display: flex;
+  flex-direction: column;
   background: rgba(255, 255, 255, .1);
   border: 1px solid rgba(255, 255, 255, .28);
   border-radius: var(--raggio);
@@ -1025,9 +1038,21 @@ a { color: var(--bosco); }
   letter-spacing: .06em;
   word-break: break-all;
 }
-.iban .bottone { margin-top: 1.8rem; }
+.iban__azione {
+  margin-top: auto;
+  padding-top: 1.8rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: .9rem;
+}
+.iban__causale {
+  margin: clamp(1.2rem, 3vw, 1.8rem) 0 0;
+  font-size: .95rem;
+  color: rgba(255, 255, 255, .8);
+}
+.iban__causale strong { color: #fff; }
 .iban__copiato {
-  margin-left: .9rem;
   font-size: .8rem;
   font-weight: 700;
   letter-spacing: .12em;
