@@ -6,14 +6,18 @@ Sito a pagina singola, senza framework: tre file e una cartella di foto. Si pubb
 index.html    contenuti e testi
 style.css     colori, tipografia, impaginazione
 script.js     countdown, campi invitati, invio del modulo
+notte.js      la modalità notturna e il disegno del cielo
+cielo.js      le stelle sopra Toceno, già calcolate (generato)
 img/          le vostre foto (foto-1.jpeg, foto-2.jpeg, foto-3.jpeg)
 ```
 
-Più tre file che il sito non carica mai: `foglio-google.gs` è il codice da
+Più quattro file che il sito non carica mai: `foglio-google.gs` è il codice da
 incollare in Apps Script per raccogliere le conferme in un foglio (sezione 2);
+`strumenti-cielo.py` ricalcola il cielo della modalità notturna;
 `strumenti-motivi.py` rigenera i motivi decorativi sparsi e
-`strumenti-cornice.py` la cornice dell'apertura — questi due servono solo se
-vuoi cambiarne densità o disposizione, e si possono cancellare.
+`strumenti-cornice.py` la cornice dell'apertura. Gli ultimi tre servono solo se
+volete cambiare qualcosa di quei disegni: si possono cancellare, ma senza
+`strumenti-cielo.py` il cielo non si può più rifare.
 
 ---
 
@@ -394,6 +398,70 @@ sips -Z 2816 -s format jpeg -s formatOptions 40 img/sfondo.png --out img/sfondo.
 sips -Z 1200 -s format jpeg -s formatOptions 45 img/sfondo.png --out img/sfondo-telefono.jpg
 ```
 
+### La modalità notturna e il cielo
+
+La mezzaluna in basso a destra spegne il bosco e accende la notte. Non è un
+filtro scuro: sotto la pagina compare **il cielo che c'era davvero sopra
+Toceno il 24 luglio 2027 alle 23:30**, con le costellazioni al posto giusto.
+
+Chi non la accende non paga niente: `cielo.js` — una quarantina di KB di
+coordinate — viene scaricato al primo click e non prima. La scelta resta
+ricordata (`localStorage`) per le visite successive. Il valore predefinito è il
+giorno: il sito è un bosco d'estate, la notte è una cosa che si sceglie. Se
+preferite che si accenda da sola a chi ha il telefono in tema scuro, in fondo a
+`notte.js` c'è la riga che legge il ricordo: basta aggiungere un controllo su
+`matchMedia("(prefers-color-scheme: dark)")`.
+
+**Perché il calcolo non è nel sito.** Dove stanno le stelle dipende da data, ora
+e luogo, e tutti e tre sono fissi. Li calcola una volta `strumenti-cielo.py`, che
+lascia in `cielo.js` delle coordinate già piatte, pronte da moltiplicare per il
+raggio dello schermo. Nessuna libreria di astronomia da caricare, e lo stesso
+identico cielo per tutti — che è anche più giusto: è il *vostro* cielo, non
+quello di chi guarda.
+
+Per rifarlo (altra data, altra ora, altro paese) si cambiano le costanti in cima
+a `strumenti-cielo.py` e si rilancia:
+
+```
+python3 strumenti-cielo.py
+```
+
+Si scarica da solo i cataloghi (bright stars e figure delle costellazioni, dal
+progetto d3-celestial) e riscrive `cielo.js`. Stampa anche i controlli che
+servono a capire se il conto torna:
+
+- **il Sole a −18°**, cioè notte astronomica piena: se qui leggete un numero
+  vicino a zero avete scelto un'ora in cui c'è ancora luce;
+- **la Polare alta quanto la latitudine.** È la verifica più forte di tutte: se
+  la matematica dell'orizzonte fosse sbagliata, questo numero non tornerebbe. A
+  Toceno dà 45,7° contro una latitudine di 46,1°, e la differenza è giusta —
+  la Polare non sta esattamente sul polo, gli gira intorno a tre quarti di grado;
+- **Vega, Deneb e Altair**, il Triangolo Estivo, che a quell'ora di luglio deve
+  stare quasi sopra la testa: 81°, 64° e 47°.
+
+**Cosa si vede.** Zenit al centro dello schermo, orizzonte sul cerchio esterno,
+nord in alto ed est **a sinistra** — perché si guarda in su, non in giù su una
+cartina. Il disco è scalato sulla diagonale, così non restano angoli vuoti: in
+cambio le stelle più basse finiscono fuori quadro, che è poi quello che fa anche
+il crinale delle montagne. Il colore delle stelle non è deciso a caso, viene
+dall'indice B−V del catalogo: Vega bianco-azzurra, Antares rossa.
+
+**La regola da non rompere.** Il cielo passa sotto ai testi attraverso un velo
+scuro, mai dietro a un testo nudo. Il caso peggiore — una stella bianca
+esattamente dietro a una lettera — è calcolato: col velo all'80% il testo chiaro
+resta a 9,8:1 e quello tenue a 5,6:1, contro il minimo di 4,5:1. Se alleggerite
+i veli in `body.notte .sezione`, rifate quel conto prima.
+
+**Tre variabili di ruolo.** Nel `:root` di `style.css` ci sono `--accento`,
+`--accento-caldo`, `--carta` e `--inchiostro`. Non sono tinte nuove: di giorno
+valgono esattamente quanto valevano prima. Servono perché tre colori facevano
+due lavori diversi — il verde era insieme il fondo dei bottoni e il colore dei
+link — e di notte i due lavori divergono: su nero un link verde bosco non si
+legge più, ma un bottone verde con la scritta bianca sì. Separare il ruolo dalla
+tinta è ciò che permette alla modalità notturna di cambiarne uno senza rompere
+l'altro. Se aggiungete testo verde scuro, usate `--inchiostro`, non
+`--bosco-scuro`, altrimenti di notte sparisce.
+
 ### La cornice dell'apertura
 
 Attorno al titolo c'è una cornice incompleta di funghi, foglie, pigne e
@@ -428,6 +496,7 @@ lasciato pulito. Se preferisci la vecchia texture di sfondo, aggiungi la parola
 - Poi **rimanda la stessa conferma** cambiando un'allergia: nel foglio la riga deve aggiornarsi, non sdoppiarsi. È la prova che conta di più, ed è quella che si dimentica.
 - Prova a inviare lasciando vuote le allergie: deve bloccarti.
 - Cancella le righe di prova prima di mandare il link in giro.
+- Accendi la mezzaluna e riscorri la pagina fino in fondo: la modalità notturna tocca ogni sezione, ed è il posto dove un colore dimenticato si vede subito.
 - Verifica che i link della mappa aprano il posto giusto.
 - Controlla **entrambi gli IBAN** carattere per carattere, e poi falli ricontrollare da qualcun altro. Controlla anche che il pulsante copi lo stesso codice che si legge sopra: sono due punti distinti del file e possono divergere.
 

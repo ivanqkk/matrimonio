@@ -65,6 +65,11 @@
 
 <a class="salta-link" href="#conferma">Vai al modulo di conferma</a>
 
+<!-- Il cielo della modalità notturna. Resta vuota e invisibile finché non si
+     accende la mezzaluna: i dati (cielo.js, una trentina di KB) vengono
+     scaricati solo in quel momento, così chi non la usa non li paga. -->
+<canvas class="cielo" id="cielo" aria-hidden="true"></canvas>
+
 <!-- ============ NAVIGAZIONE ============ -->
 <header class="nav" id="nav">
   <div class="nav__interno">
@@ -81,6 +86,18 @@
     </nav>
   </div>
 </header>
+
+<!-- ============ MEZZALUNA: MODALITÀ NOTTURNA ============ -->
+<!-- Sta in basso a destra e non dentro la barra perché la barra compare solo
+     dopo che si è scorso oltre l'apertura, e l'apertura è proprio il punto in
+     cui accendere la notte fa più effetto. -->
+<button class="luna" id="luna" type="button" aria-pressed="false"
+        aria-label="Attiva la modalità notturna" title="Modalità notturna">
+  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+    <path d="M12.6 2.4A9.6 9.6 0 1 0 21 17.1 7.6 7.6 0 0 1 12.6 2.4z"
+          fill="currentColor"/>
+  </svg>
+</button>
 
 <main id="top">
 
@@ -109,6 +126,8 @@
 
       <a class="bottone bottone--chiaro" href="#conferma">Conferma la presenza</a>
     </div>
+  
+    <p class="cielo__firma">Il cielo sopra Toceno · 24 luglio 2027, 23:30</p>
   </section>
 
   <!-- ============ CAROSELLO FOTO ============
@@ -203,7 +222,7 @@
     <div class="contenitore">
       <p class="sopratitolo sopratitolo--scuro">Il programma</p>
       <h2>Come si svolge la giornata</h2>
-      <p class="introduzione">Si comincia la mattina e si finisce prima di cena. La celebrazione del matrimonio, con rito civile, avverrà alla mattina prima di pranzo presso la ex sala parrocchiale, situatasi in centro al piccolo paese di Toceno. Dopodiché ci si sposterà insieme verso gli Alpini di Toceno. Qui sotto trovate una scaletta (indicativa) della giornata.</p>
+      <p class="introduzione">Si comincia la mattina e si finisce prima di cena. La celebrazione del matrimonio, con rito civile, avverrà alla mattina prima di pranzo presso la ex sala parrocchiale, situata in centro al piccolo paese di Toceno. Dopodiché ci si sposterà insieme verso gli Alpini di Toceno. Qui sotto trovate una scaletta (indicativa) della giornata.</p>
 
       <!-- DA CONTROLLARE: 10:30 e 11:00 sono quelli che ci avete dato; da lì in poi
            sono una proposta ragionevole, aggiustateli sui tempi veri del catering -->
@@ -451,20 +470,23 @@
 
   <!-- ============ CONFERMA PRESENZA ============ -->
   <section class="sezione" id="conferma">
-    <div class="contenitore contenitore--stretto">
+    <div class="contenitore">
       <p class="sopratitolo sopratitolo--scuro">Conferma la presenza</p>
-      <h2>Fatecelo sapere entro il 30 aprile 2027</h2>
+      <h2>Fatecelo sapere entro il 30 novembre 2026</h2>
       <p class="introduzione">Un modulo per gruppo: chi compila è la persona di riferimento per tutti gli altri. Le allergie servono al catering, quindi sono obbligatorie per ogni invitato. Potete tornare qui e rimandare il modulo tutte le volte che volete: vale sempre l'ultima risposta.</p>
 
       <form class="modulo" id="modulo" novalidate>
 
-        <div class="campo">
-          <label for="referente">Nome e cognome della persona di riferimento</label>
-          <input type="text" id="referente" name="Persona di riferimento" autocomplete="name" required>
-          <p class="campo__aiuto">È il nome con cui troviamo il vostro gruppo nella lista. Se state aggiornando una risposta già inviata, scrivetelo come la prima volta.</p>
-        </div>
-
-        <div class="campo-doppio">
+        <!-- I tre campi di contatto stanno su una riga sola quando c'è spazio:
+             sono brevi, e un campo «Telefono» largo mezzo schermo fa sembrare
+             il modulo più lungo di quello che è. Sotto gli 800px la riga si
+             scompone da sola, senza bisogno di toccare l'HTML. -->
+        <div class="campo-riga">
+          <div class="campo">
+            <label for="referente">Nome e cognome della persona di riferimento</label>
+            <input type="text" id="referente" name="Persona di riferimento" autocomplete="name" required>
+            <p class="campo__aiuto">È il nome con cui troviamo il vostro gruppo nella lista. Se state aggiornando una risposta già inviata, scrivetelo come la prima volta.</p>
+          </div>
           <div class="campo">
             <label for="email">Email</label>
             <input type="email" id="email" name="Email" autocomplete="email" required>
@@ -532,7 +554,7 @@
     <div class="contenitore">
       <p class="sopratitolo">Regali</p>
       <h2>Se volete farci un pensiero</h2>
-      <p class="introduzione introduzione--chiara">La cosa che ci fa più piacere è avervi lì. Chi desidera contribuire può farlo con un bonifico: stiamo mettendo da parte per il viaggio di nozze in Giappone. I conti sono due, intestati a ciascuno di noi: usate quello che preferite, per noi è lo stesso.</p>
+      <p class="introduzione introduzione--chiara">La cosa che ci fa più piacere è festeggiare insieme. Però, se vi sentite di contribuire, possiamo accettare un regalo, ancora meglio, un bonifico (considerato che viviamo in un appartamento di 38 mq a Stoccolma, un servizio piatti da 60 sarebbe leggermente scomodo da incastrare in valigia...). I conti sono due, intestati a ciascuno di noi: usate quello che preferite, per noi è lo stesso.</p>
 
       <div class="iban-coppia">
         <div class="iban">
@@ -579,5 +601,6 @@
 </footer>
 
 <script src="script.js"></script>
+<script src="notte.js" defer></script>
 </body>
 </html>

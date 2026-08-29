@@ -25,6 +25,17 @@
   --bordo-campo: #C3D0C5;
   --rosso: #A63A2B;
 
+  /* ---- ruoli, non tinte ----
+     Tre colori qui sopra fanno due lavori diversi, e di notte i due lavori
+     divergono: il verde è insieme il fondo dei bottoni e il colore dei link, e
+     su nero un link verde bosco non si legge più. Queste tre variabili
+     separano il ruolo dalla tinta, così la modalità notturna può cambiare uno
+     senza toccare l'altro. Di giorno valgono esattamente quanto prima. */
+  --accento: var(--bosco);          /* verde quando fa da TESTO: link, occhielli */
+  --accento-caldo: var(--pigna);    /* bruno quando fa da testo */
+  --carta: var(--bianco);           /* bianco quando fa da SUPERFICIE: schede, moduli */
+  --inchiostro: var(--bosco-scuro); /* verde scuro quando fa da TESTO: etichette, voci di menu */
+
   --display: "Fraunces", Georgia, serif;
   --testo-font: "Manrope", system-ui, -apple-system, sans-serif;
 
@@ -133,7 +144,7 @@ h1, h2, h3 {
 h2 { font-size: clamp(2rem, 4.6vw, 3.1rem); margin-bottom: .6rem; }
 h3 { font-size: 1.2rem; margin-bottom: .35rem; }
 
-a { color: var(--bosco); }
+a { color: var(--accento); }
 
 .salta-link {
   position: absolute;
@@ -175,7 +186,7 @@ a { color: var(--bosco); }
   color: var(--oro);
   margin: 0 0 1rem;
 }
-.sopratitolo--scuro { color: var(--bosco); }
+.sopratitolo--scuro { color: var(--accento); }
 /* variante grande, solo per l'apertura */
 .sopratitolo--apertura {
   font-size: clamp(.95rem, 3.2vw, 1.4rem);
@@ -223,7 +234,7 @@ a { color: var(--bosco); }
 }
 .bottone:hover { background: var(--bosco-scuro); border-color: var(--bosco-scuro); transform: translateY(-1px); }
 
-.bottone--vuoto { background: transparent; color: var(--bosco); }
+.bottone--vuoto { background: transparent; color: var(--accento); }
 .bottone--vuoto:hover { background: var(--bosco); color: var(--bianco); }
 
 .bottone--chiaro { background: var(--bianco); border-color: var(--bianco); color: var(--bosco-scuro); }
@@ -260,7 +271,7 @@ a { color: var(--bosco); }
   width: 1.15em;
   height: 1.15em;
   margin-left: .28em;
-  color: var(--pigna);
+  color: var(--accento-caldo);
 }
 .scoiattolo--fondo {
   width: 52px;
@@ -296,11 +307,11 @@ a { color: var(--bosco); }
 .nav__monogramma {
   font-family: var(--display);
   font-size: 1.35rem;
-  color: var(--bosco-scuro);
+  color: var(--inchiostro);
   text-decoration: none;
   letter-spacing: .02em;
 }
-.nav__monogramma span { color: var(--pigna); }
+.nav__monogramma span { color: var(--accento-caldo); }
 
 .nav__menu { display: flex; gap: 1.6rem; }
 .nav__menu a {
@@ -309,11 +320,11 @@ a { color: var(--bosco); }
   letter-spacing: .1em;
   text-transform: uppercase;
   text-decoration: none;
-  color: var(--bosco-scuro);
+  color: var(--inchiostro);
   padding: .3rem 0;
   border-bottom: 1px solid transparent;
 }
-.nav__menu a:hover, .nav__menu a.attivo { border-bottom-color: var(--pigna); }
+.nav__menu a:hover, .nav__menu a.attivo { border-bottom-color: var(--accento-caldo); }
 
 .nav__toggle {
   display: none;
@@ -326,14 +337,14 @@ a { color: var(--bosco); }
   font-weight: 700;
   letter-spacing: .12em;
   text-transform: uppercase;
-  color: var(--bosco-scuro);
+  color: var(--inchiostro);
   cursor: pointer;
   padding: .4rem 0;
 }
 .nav__toggle-barre {
   width: 22px; height: 9px;
-  border-top: 2px solid var(--bosco-scuro);
-  border-bottom: 2px solid var(--bosco-scuro);
+  border-top: 2px solid var(--inchiostro);
+  border-bottom: 2px solid var(--inchiostro);
 }
 
 /* ---------- apertura ---------- */
@@ -603,7 +614,7 @@ a { color: var(--bosco); }
   border: 1px solid var(--bosco-tenue);
   border-radius: 100px;
   background: rgba(255, 255, 255, .92);
-  color: var(--bosco);
+  color: var(--accento);
   cursor: pointer;
   box-shadow: var(--ombra);
   transition: background .2s ease, color .2s ease;
@@ -655,7 +666,7 @@ a { color: var(--bosco); }
   letter-spacing: .06em;
   cursor: pointer;
 }
-.carosello__pausa:hover { border-color: var(--bosco); color: var(--bosco); }
+.carosello__pausa:hover { border-color: var(--accento); color: var(--accento); }
 .carosello__pausa svg { width: .85rem; height: .85rem; fill: currentColor; }
 /* si mostra l'icona del gesto che il pulsante compie, non lo stato attuale */
 .carosello__pausa .carosello__icona-avvio,
@@ -665,7 +676,7 @@ a { color: var(--bosco); }
 /* ---------- sezioni ---------- */
 
 .sezione { padding: clamp(5rem, 11vw, 8rem) 0; }
-.sezione--chiara { background: var(--bianco); }
+.sezione--chiara { background: var(--carta); }
 .sezione--scura { background: var(--bosco); color: var(--bianco); }
 .sezione--scura h2 { color: var(--bianco); }
 /* la sezione delle foto sta fra l'apertura e la banda: un po' più compatta */
@@ -693,7 +704,7 @@ a { color: var(--bosco); }
   font-family: var(--display);
   font-size: 1.5rem;
   font-weight: 300;
-  color: var(--bosco);
+  color: var(--accento);
   font-variant-numeric: tabular-nums;
 }
 .tappa__testo p { margin: 0; color: var(--testo-tenue); }
@@ -744,7 +755,7 @@ a { color: var(--bosco); }
   font-weight: 700;
   letter-spacing: .18em;
   text-transform: uppercase;
-  color: var(--pigna);
+  color: var(--accento-caldo);
   margin-bottom: .55rem;
 }
 .luogo__indirizzo {
@@ -828,7 +839,7 @@ a { color: var(--bosco); }
   font-weight: 700;
   letter-spacing: .18em;
   text-transform: uppercase;
-  color: var(--pigna);
+  color: var(--accento-caldo);
   margin: 0 0 .5rem;
 }
 .parcheggio__nome {
@@ -868,7 +879,7 @@ a { color: var(--bosco); }
 /* ---------- modulo ---------- */
 
 .modulo {
-  background: var(--bianco);
+  background: var(--carta);
   border: 1px solid var(--bosco-tenue);
   border-radius: var(--raggio);
   padding: clamp(1.5rem, 4vw, 2.5rem);
@@ -881,6 +892,14 @@ a { color: var(--bosco); }
   grid-template-columns: 1fr 1fr;
   gap: 1.2rem;
 }
+/* Nome, email e telefono su una riga. Il nome prende più spazio perché è il
+   campo che ne contiene di più, e perché sotto ha una riga di spiegazione. */
+.campo-riga {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr 1fr;
+  gap: 1.2rem;
+  align-items: start;
+}
 
 .campo label, .campo legend {
   display: block;
@@ -889,7 +908,7 @@ a { color: var(--bosco); }
   letter-spacing: .04em;
   margin-bottom: .5rem;
   padding: 0;
-  color: var(--bosco-scuro);
+  color: var(--inchiostro);
 }
 .campo__facoltativo {
   font-weight: 500;
@@ -918,11 +937,14 @@ a { color: var(--bosco); }
   border-radius: var(--raggio);
 }
 .campo textarea { resize: vertical; }
+/* Un menu a tendina con dentro «3 persone» non ha motivo di essere largo
+   come il modulo: gli diamo la misura del suo contenuto e basta. */
+.campo select { max-width: 20rem; }
 
 .campo input:focus, .campo select:focus, .campo textarea:focus {
   outline: 2px solid var(--bosco);
   outline-offset: 0;
-  background: var(--bianco);
+  background: var(--carta);
 }
 
 .campo input[aria-invalid="true"],
@@ -956,10 +978,24 @@ a { color: var(--bosco); }
   letter-spacing: 0 !important;
 }
 .scelta:has(input:checked) {
-  border-color: var(--bosco);
+  border-color: var(--accento);
   background: var(--bosco-tenue);
 }
-.scelta input { accent-color: var(--bosco); width: 1.05rem; height: 1.05rem; }
+.scelta input { accent-color: var(--accento); width: 1.05rem; height: 1.05rem; }
+
+/* Le schede degli invitati si affiancano finché ognuna ha almeno 320px: con
+   sei o otto persone la colonna unica diventava un nastro lunghissimo, e per
+   arrivare al pulsante d'invio si scorreva a vuoto. Sotto quella soglia
+   tornano in colonna da sole. */
+.invitati {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1rem;
+  align-items: start;
+  /* lo stacco dal campo che segue: prima lo dava il margine dell'ultima scheda,
+     ora che le schede sono celle di una griglia deve darlo il contenitore */
+  margin: 0 0 1.5rem;
+}
 
 /* schede invitato generate dal numero di persone */
 .invitato {
@@ -967,13 +1003,13 @@ a { color: var(--bosco); }
   border-left: 3px solid var(--pigna);
   border-radius: var(--raggio);
   padding: 1.3rem;
-  margin: 0 0 1rem;
+  margin: 0;
   background: var(--nebbia);
 }
 .invitato__titolo {
   font-family: var(--display);
   font-size: 1.05rem;
-  color: var(--bosco-scuro);
+  color: var(--inchiostro);
   margin: 0 0 1rem;
 }
 .invitato .campo:last-child { margin-bottom: 0; }
@@ -987,7 +1023,7 @@ a { color: var(--bosco); }
   border: 1px dashed var(--pigna);
   border-radius: 100px;
   background: transparent;
-  color: var(--pigna);
+  color: var(--accento-caldo);
   cursor: pointer;
 }
 .rapida:hover { background: var(--pigna); color: var(--bianco); border-style: solid; }
@@ -1107,7 +1143,8 @@ a { color: var(--bosco); }
   .nav__menu a { padding: .85rem 0; border-bottom: 1px solid var(--bosco-tenue); }
   .nav__menu a:last-child { border-bottom: 0; }
 
-  .campo-doppio { grid-template-columns: 1fr; gap: 0; }
+  .campo-doppio,
+  .campo-riga { grid-template-columns: 1fr; gap: 0; }
   .tappa { grid-template-columns: 4.5rem 1fr; gap: 1rem; }
   .scelte { flex-direction: column; align-items: stretch; }
 
@@ -1173,3 +1210,166 @@ a { color: var(--bosco); }
   .nav { transition: none; }
   .carosello__pista { scroll-behavior: auto; }
 }
+
+
+/* ============================================================
+   MODALITÀ NOTTURNA
+   Si accende con la mezzaluna in basso a destra, e sotto tutto
+   compare il cielo che c'era davvero sopra Toceno la notte del
+   matrimonio (il disegno lo fa notte.js, i dati cielo.js).
+
+   Regola che tiene in piedi tutto il resto: il cielo passa SOTTO
+   ai testi attraverso un velo scuro, mai dietro a un testo nudo.
+   Il caso peggiore — una stella bianca esattamente dietro a una
+   lettera — è calcolato: col velo all'80% il testo chiaro resta
+   a 9,8:1 e quello tenue a 5,6:1, cioè sopra il minimo di 4,5:1.
+   Se alleggerite il velo, rifate quel conto.
+   ============================================================ */
+
+body.notte {
+  --nebbia: #121A24;          /* superfici: schede, riquadri, campi */
+  --carta: #0F1621;
+  --bianco: #FFFFFF;          /* resta bianco: qui fa da testo, non da fondo */
+  --testo: #E7EDF3;
+  --testo-tenue: #A9B6C4;
+  --bosco-tenue: #26323F;     /* bordi */
+  --bordo-campo: #35414E;
+  --accento: #93C9A6;         /* i link: verde bosco schiarito fino a leggersi su nero */
+  --accento-caldo: #E0B489;
+  --oro: #E8C978;
+  --rosso: #FF8A78;
+  --inchiostro: var(--testo);
+  --ombra: 0 18px 40px -24px rgba(0, 0, 0, .8);
+
+  background: #05070C;
+  color: var(--testo);
+}
+
+/* La tela del cielo sta sotto a tutto e non si muove con la pagina: è il
+   cielo, non un'immagine incollata al documento. */
+.cielo {
+  display: none;
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  pointer-events: none;
+}
+body.notte .cielo { display: block; }
+
+/* I veli. Ogni sezione posa un fondo scuro semitrasparente sopra al cielo:
+   le stelle continuano a intravedersi, il testo non ci finisce mai sopra. */
+body.notte .sezione { background: rgba(5, 8, 13, .80); }
+body.notte .sezione--chiara { background: rgba(5, 8, 13, .80); }
+body.notte .sezione--scura { background: rgba(3, 6, 10, .86); color: var(--testo); }
+body.notte .sezione--foto { background: rgba(5, 8, 13, .72); }
+/* Il fondo pagina lascia passare più cielo: lì sotto non c'è quasi niente da
+   leggere ed è il punto in cui la pagina si apre di nuovo sulla notte. */
+body.notte .fondo { background: rgba(3, 6, 10, .55); color: var(--testo-tenue); }
+
+/* L'apertura: la foto del bosco se ne va e resta il cielo. Il pannello dietro
+   al titolo rimane, perché è lui a garantire il contrasto: cambia solo tinta. */
+body.notte .apertura {
+  --foto-sfondo: none;
+  background-color: transparent;
+}
+body.notte .apertura__contenuto::before {
+  background: rgba(4, 8, 14, .86);
+  box-shadow: 0 0 90px 40px rgba(4, 8, 14, .86);
+}
+/* La targa della data ha un velo verde tutto suo, che serviva a staccarla
+   dalla fotografia del bosco. Sul cielo quel verde diventava un rettangolo
+   fuori posto: qui è lo stesso velo, in blu notte. */
+body.notte .apertura__quando { background: rgba(10, 18, 30, .72); }
+
+/* Le greche: di giorno sono verde bosco al 45%, che su nero sparirebbe. */
+body.notte .banda { background-color: #7FA891; opacity: .3; }
+
+body.notte .nav {
+  background: rgba(8, 12, 18, .92);
+  border-bottom-color: var(--bosco-tenue);
+}
+
+/* I bottoni pieni restano verdi ma un gradino più chiari: su fondo notturno
+   il verde bosco si confondeva col nero. Il bianco sopra tiene 5,9:1. */
+body.notte .bottone { background: #3C6E55; border-color: #3C6E55; }
+body.notte .bottone:hover { background: #4A8266; border-color: #4A8266; }
+body.notte .bottone--vuoto { background: transparent; }
+body.notte .bottone--vuoto:hover { background: var(--accento); color: #08131C; }
+body.notte .bottone--chiaro { background: var(--oro); border-color: var(--oro); color: #1A1206; }
+body.notte .bottone--chiaro:hover { background: #F3DA9A; border-color: #F3DA9A; }
+
+body.notte .carosello__freccia { background: rgba(18, 26, 36, .92); color: var(--testo); }
+body.notte .carosello__freccia:hover { background: var(--accento); color: #08131C; }
+body.notte .carosello__punto { border-color: var(--testo-tenue); }
+body.notte .carosello__punto[aria-current="true"] { background: var(--accento); border-color: var(--accento); }
+
+body.notte .rapida:hover { background: var(--accento-caldo); color: #1A1206; }
+body.notte .scelta:has(input:checked) { background: #1B2A22; border-color: var(--accento); }
+body.notte .modulo__esito--ok { background: #16241A; border-color: #4E7A55; color: #9FD3A8; }
+body.notte .modulo__esito--ko { background: #2A1512; border-color: #8A4034; color: #FF8A78; }
+body.notte .iban { background: rgba(255, 255, 255, .06); border-color: rgba(255, 255, 255, .18); }
+
+/* Le mappe incorporate restano lastre bianche accecanti in mezzo al nero.
+   Non possiamo entrarci dentro — sono di Google — ma possiamo smorzarle
+   finché non ci si passa sopra. */
+body.notte .luogo__mappa iframe {
+  filter: brightness(.78) contrast(1.05);
+  transition: filter .3s ease;
+}
+body.notte .luogo__mappa iframe:hover { filter: none; }
+
+/* ---------- la mezzaluna ---------- */
+
+.luna {
+  position: fixed;
+  right: clamp(1rem, 3vw, 2rem);
+  bottom: clamp(1rem, 3vw, 2rem);
+  z-index: 60;
+  width: 46px;
+  height: 46px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, .35);
+  border-radius: 50%;
+  background: rgba(15, 26, 20, .55);
+  backdrop-filter: blur(6px);
+  color: #F2E7C8;
+  cursor: pointer;
+  transition: background .25s ease, color .25s ease, transform .25s ease, border-color .25s ease;
+}
+.luna:hover { transform: scale(1.08); background: rgba(15, 26, 20, .8); }
+.luna svg { width: 22px; height: 22px; display: block; }
+
+body.notte .luna {
+  background: rgba(232, 201, 120, .16);
+  border-color: rgba(232, 201, 120, .6);
+  color: var(--oro);
+}
+
+/* Chi ha chiesto meno movimento non vede la lente ingrandirsi, e le stelle non
+   pulsano (quello lo decide notte.js). */
+@media (prefers-reduced-motion: reduce) {
+  .luna { transition: none; }
+  .luna:hover { transform: none; }
+}
+
+/* La firma del cielo: dice di che cielo si tratta, altrimenti resta un
+   fondale qualsiasi invece del vostro. */
+.cielo__firma {
+  display: none;
+  position: absolute;
+  left: 50%;
+  bottom: clamp(.8rem, 2.5vh, 1.6rem);
+  transform: translateX(-50%);
+  margin: 0;
+  font-size: .68rem;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: rgba(226, 236, 245, .55);
+  text-align: center;
+  padding: 0 1rem;
+}
+body.notte .cielo__firma { display: block; }
